@@ -37,6 +37,7 @@ vector<int> bellman_ford(int start, vector<vector<pair<int,int>>> const& g){
 	for(int i = 0; i < n-1; ++i){
 		for(auto&[edge,cost] : edges){
 		 	auto [from, to] = edge;
+			if(dist[from] == INT_MAX) continue;
 			dist[to] = min(dist[to], dist[from] + cost);
 		}
 	}
@@ -55,12 +56,13 @@ bool bellman_ford_ciclo_negativo(int start, vector<vector<pair<int,int>>> const&
 	for(int i = 0; i < n-1; ++i){
 		for(auto&[edge,cost] : edges){
 		 	auto [from, to] = edge;
+			if(dist[from] == INT_MAX) continue;
 			dist[to] = min(dist[to], dist[from] + cost);
 		}
 	}
 	for(auto&[edge,cost] : edges){
 		auto [from, to] = edge;
-		if(dist[from] + cost < dist[to]) {
+		if(dist[from] != INT_MAX && dist[from] + cost < dist[to]) {
 			return false;
 		}
 	}
@@ -80,7 +82,7 @@ vector<int> bellman_ford_camino(int start, vector<vector<pair<int,int>>> const& 
 	for(int i = 0; i < n-1; ++i){
 		for(auto&[edge,cost] : edges){
 		 	auto [from, to] = edge;
-			if(dist[to] > dist[from] + cost){
+			if(dist[from] != INT_MAX && dist[to] > dist[from] + cost){
 				dist[to] = dist[from] + cost;
 				pred[to] = from;
 			}
@@ -88,8 +90,7 @@ vector<int> bellman_ford_camino(int start, vector<vector<pair<int,int>>> const& 
 	}
 	return pred;
 }
-// https://arxiv.org/abs/1904.01210v1
-
+// https://arxiv.org/abs/1904.01210v1 KIJ = 3·IJK = 2·IKJ
 vector<vector<int>> floyd_warshall(vector<vector<pair<int,int>>> const& g){
 	int n = g.size();
 	vector<vector<int>> dist(n, vector<int>(n, INT_MAX));
@@ -102,7 +103,7 @@ vector<vector<int>> floyd_warshall(vector<vector<pair<int,int>>> const& g){
     for(int k = 0; k < n; k++) {
         for(int i = 0; i < n; i++) {
             for(int j = 0; j < n; j++){
-				if(dist[i][k] != INF && dist[k][j] != INF)
+				if(dist[i][k] != INT_MAX && dist[k][j] != INT_MAX)
                 	dist[i][j] = min(dist[i][j], dist[i][k] + dist[k][j]);
             }
 		}
@@ -110,6 +111,7 @@ vector<vector<int>> floyd_warshall(vector<vector<pair<int,int>>> const& g){
     return dist;
 }
 vector<vector<int>> floyd_warshall_pato(vector<vector<pair<int,int>>> const& g){
+	/// Marca con -1 los caminos que tienen ciclos negativos
 	int n = g.size();
 	vector<vector<int>> dist(n, vector<int>(n, INT_MAX));
 	for(int curr = 0; curr < n; ++curr){
